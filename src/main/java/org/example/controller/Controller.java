@@ -12,12 +12,15 @@ import java.awt.geom.Rectangle2D;
 
 // TODO: Сделать singleton класс
 public class Controller {
+
+    private static Controller instance;
     private final Model model;
     private final MyFrame frame;
     private final MyPanel panel;
     private Point2D firstPoint;
     private Point2D secondPoint;
-    public Controller() {
+
+    private Controller() {
         model = new Model();
         MyShape shape = new MyShape(new Rectangle2D.Double());
         shape.setFb(new NoFill());
@@ -29,6 +32,13 @@ public class Controller {
 
         frame = new MyFrame();
         frame.setPanel(panel);
+    }
+
+    public static synchronized Controller getInstance() {
+        if (instance == null) {
+            instance = new Controller();
+        }
+        return instance;
     }
     public void getPointOne(Point2D p){
         firstPoint = p;

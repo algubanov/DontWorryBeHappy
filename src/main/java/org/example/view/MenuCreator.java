@@ -4,9 +4,14 @@ import lombok.Setter;
 import org.example.controller.Controller;
 import org.example.model.factory.ShapeState;
 import org.example.model.factory.ShapeType;
+import org.example.view.menu.AppCommand;
+import org.example.view.menu.CommandActionListener;
+import org.example.view.menu.SwitchFill;
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.URL;
+import java.util.ArrayList;
 
 public class MenuCreator {
     private static MenuCreator instanse;
@@ -14,6 +19,9 @@ public class MenuCreator {
     private ShapeState shapeState;
     @Setter
     private Controller controller;
+
+    private JRadioButtonMenuItem fillItem;
+    private JRadioButtonMenuItem noFillItem;
 
     private MenuCreator() {
 
@@ -41,6 +49,31 @@ public class MenuCreator {
 
         return jMenuBar;
     }
+
+    public JToolBar createToolBar(int orientation) {
+        ArrayList<Action> toolBarItems = createToolBarItems();
+        JToolBar jToolBar = new JToolBar(orientation);
+        toolBarItems.forEach(jToolBar::add);
+
+        return jToolBar;
+    }
+
+    private ArrayList<Action> createToolBarItems() {
+        ArrayList<Action> menuItems = new ArrayList<>();
+
+        URL fillUrl = getClass().getClassLoader().getResource("ico/fill_16x16.png");
+        ImageIcon fillIco = fillUrl == null ? null : new ImageIcon(fillUrl);
+        AppCommand fillCommand = new SwitchFill(true, shapeState, fillItem, noFillItem);
+        menuItems.add(new CommandActionListener("С Заливкой", fillIco, fillCommand));
+
+        URL noFillUrl = getClass().getClassLoader().getResource("ico/no_fill_16x16.png");
+        ImageIcon noFillIco = noFillUrl == null ? null : new ImageIcon(noFillUrl);
+        AppCommand noFillCommand = new SwitchFill(false, shapeState, fillItem, noFillItem);
+        menuItems.add(new CommandActionListener("Без Заливки", noFillIco, noFillCommand));
+
+        return menuItems;
+    }
+
     private JMenu createActionMenu() {
         ButtonGroup group = new ButtonGroup();
         JMenu actionMenu = new JMenu("Действие");
@@ -56,13 +89,13 @@ public class MenuCreator {
         ButtonGroup group = new ButtonGroup();
         JMenu fillMenu = new JMenu();
 
-        JRadioButtonMenuItem fillItem = new JRadioButtonMenuItem("С заливкой", true);
-        fillItem.addActionListener(action -> shapeState.setFill(true));
+        fillItem = new JRadioButtonMenuItem("С заливкой", true);
+        noFillItem = new JRadioButtonMenuItem("Без заливки", false);
+        fillItem.addActionListener(new CommandActionListener(new SwitchFill(true, shapeState, fillItem, noFillItem)));
+        noFillItem.addActionListener(new CommandActionListener(new SwitchFill(false, shapeState, fillItem, noFillItem)));
         fillMenu.add(fillItem);
         group.add(fillItem);
 
-        JRadioButtonMenuItem noFillItem = new JRadioButtonMenuItem("Без заливки", false);
-        noFillItem.addActionListener(action -> shapeState.setFill(true));
         fillMenu.add(noFillItem);
         group.add(noFillItem);
 
@@ -83,7 +116,7 @@ public class MenuCreator {
         group.add(blueItem);
 
         JRadioButtonMenuItem rgbItem = new JRadioButtonMenuItem("Выбор цвета");
-        blueItem.addActionListener(action -> shapeState.setColor(JColorChooser.showDialog(null, "Выбор цвета", Color.BLACK)));
+        rgbItem.addActionListener(action -> shapeState.setColor(JColorChooser.showDialog(null, "Выбор цвета", Color.BLACK)));
         shapeMenu.add(rgbItem);
         group.add(rgbItem);
 

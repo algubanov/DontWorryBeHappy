@@ -2,11 +2,13 @@ package org.example.view;
 
 import lombok.Setter;
 import org.example.controller.Controller;
+import org.example.controller.action.AppAction;
 import org.example.model.factory.ShapeState;
 import org.example.model.factory.ShapeType;
 import org.example.view.menu.AppCommand;
 import org.example.view.menu.CommandActionListener;
 import org.example.view.menu.SwitchFill;
+import org.example.view.menu.SwitchShape;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,9 +21,10 @@ public class MenuCreator {
     private ShapeState shapeState;
     @Setter
     private Controller controller;
+    private JRadioButtonMenuItem squareItem;
+    private JRadioButtonMenuItem circleItem;
 
-    private JRadioButtonMenuItem fillItem;
-    private JRadioButtonMenuItem noFillItem;
+    private JRadioButtonMenuItem fillItem, noFillItem;
 
     private MenuCreator() {
 
@@ -47,13 +50,16 @@ public class MenuCreator {
         JMenu FillMenu = createFillMenu();
         jMenuBar.add(FillMenu);
 
+        JMenu actionMenu = createActionMenu();
+        jMenuBar.add(actionMenu);
+
         return jMenuBar;
     }
 
     public JToolBar createToolBar(int orientation) {
-        ArrayList<Action> toolBarItems = createToolBarItems();
+        ArrayList<Action> actionArrayList = createToolBarItems();
         JToolBar jToolBar = new JToolBar(orientation);
-        toolBarItems.forEach(jToolBar::add);
+        actionArrayList.forEach(jToolBar::add);
 
         return jToolBar;
     }
@@ -71,20 +77,19 @@ public class MenuCreator {
         AppCommand noFillCommand = new SwitchFill(false, shapeState, fillItem, noFillItem);
         menuItems.add(new CommandActionListener("Без Заливки", noFillIco, noFillCommand));
 
+        URL recUrl = getClass().getClassLoader().getResource("ico/rectangular_16x16.png");
+        ImageIcon recIco = recUrl == null ? null : new ImageIcon(recUrl);
+        AppCommand shapeCommand = new SwitchShape(shapeState,ShapeType.RECTANGULAR_SHAPE, squareItem);
+        menuItems.add(new CommandActionListener("Квадрат", recIco, shapeCommand));
+
+        URL ellUrl = getClass().getClassLoader().getResource("ico/ellipse_16x16.png");
+        ImageIcon ellIco = ellUrl == null ? null : new ImageIcon(ellUrl);
+        AppCommand shapestate = new SwitchShape(shapeState,ShapeType.ELLIPSE_SHAPE, circleItem);
+        menuItems.add(new CommandActionListener("Круг", ellIco, shapestate));
+
         return menuItems;
     }
 
-    private JMenu createActionMenu() {
-        ButtonGroup group = new ButtonGroup();
-        JMenu actionMenu = new JMenu("Действие");
-
-        JRadioButtonMenuItem drawItem = new JRadioButtonMenuItem("Рисовать", true);
-        drawItem.addActionListener(action -> controller.switchActionDraw());
-        actionMenu.add(drawItem);
-        group.add(drawItem);
-
-        return actionMenu;
-    }
     private JMenu createFillMenu() {
         ButtonGroup group = new ButtonGroup();
         JMenu fillMenu = new JMenu();
@@ -105,6 +110,7 @@ public class MenuCreator {
     private JMenu createColorMenu() {
         ButtonGroup group = new ButtonGroup();
         JMenu shapeMenu = new JMenu("Цвет");
+
         JRadioButtonMenuItem redItem = new JRadioButtonMenuItem("Красный", true);
         redItem.addActionListener(action -> shapeState.setColor(Color.RED));
         shapeMenu.add(redItem);
@@ -126,11 +132,28 @@ public class MenuCreator {
     private JMenu createShapeMenu() {
         ButtonGroup group = new ButtonGroup();
         JMenu shapeMenu = new JMenu("Фигура");
-        JRadioButtonMenuItem squareItem = new JRadioButtonMenuItem("Прямоугольнык", true);
-        squareItem.addActionListener(action -> shapeState.setShapeType(ShapeType.RECTANGULAR_SHAPE));
-        shapeMenu.add(squareItem);
-        group.add(squareItem);
 
-        return shapeMenu;
+        squareItem = new JRadioButtonMenuItem("Прямоугольник", true);
+        circleItem = new JRadioButtonMenuItem("Круг", true);
+        squareItem.addActionListener(new CommandActionListener(new SwitchShape(shapeState, ShapeType.RECTANGULAR_SHAPE, squareItem)));
+        circleItem.addActionListener(new CommandActionListener(new SwitchShape(shapeState, ShapeType.ELLIPSE_SHAPE, circleItem)));
+
+        shapeMenu.add(squareItem);
+        shapeMenu.add(circleItem);
+        group.add(squareItem);
+        group.add(circleItem);
+
+        return  shapeMenu;
+    }
+    private JMenu createActionMenu() {
+        ButtonGroup group = new ButtonGroup();
+        JMenu actionMenu = new JMenu("Действие");
+
+        JRadioButtonMenuItem drawItem = new JRadioButtonMenuItem("Рисовать", true);
+        drawItem.addActionListener(action -> controller.switchActionDraw());
+        actionMenu.add(drawItem);
+        group.add(drawItem);
+
+        return actionMenu;
     }
 }

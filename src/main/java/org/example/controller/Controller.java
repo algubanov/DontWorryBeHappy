@@ -25,19 +25,18 @@ public class Controller {
 
     private Controller() {
         model = new Model();
-
         panel = new MyPanel(this);
         model.addObserver(panel);
         frame = new MyFrame();
-        shapeState = new ShapeState(ShapeType.RECTANGULAR_SHAPE, Color.RED, true );
+        shapeState = new ShapeState(ShapeType.RECTANGULAR_SHAPE, Color.RED, true);
         action = new ActionDraw(model, shapeState);
-        frame.setPanel(panel);
 
         MenuCreator menuCreator = MenuCreator.getInstanse();
         menuCreator.setController(this);
         menuCreator.setShapeState(shapeState);
         JMenuBar menuBar = menuCreator.createMenu();
         frame.setJMenuBar(menuBar);
+
         JToolBar jToolBar = menuCreator.createToolBar(JToolBar.VERTICAL);
         frame.add(jToolBar, BorderLayout.EAST);
 
